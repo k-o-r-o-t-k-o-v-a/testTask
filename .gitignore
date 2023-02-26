@@ -1,0 +1,35 @@
+#osx noise
+.DS_Store
+.DS_Store?
+profile
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+#sublime
+*.sublime-project
+*.sublime-workspace
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+
+#visual studio code
+#.vscode
+
+*.diff
+*.patch
+!patches/*.patch
+
+#frontend build
+node_modules/
+npm-debug.log
+public
+/*.png
+/*.svg
+.vscode
+config.json
+
+#idea
+.idea

@@ -1,0 +1,54 @@
+.Button {
+  padding: 13px 37px;
+  border-radius: 20px;
+  transition: all .2s ease;
+  overflow: hidden;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-transform: uppercase;
+  background-color: unset;
+  background-color: #7B68EE;
+  color: #fff;
+  border: none;
+  position: relative;
+
+  &:hover {
+    opacity: .7;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    pointer-events: none;
+    touch-action: none;
+    opacity: .5;
+  }
+
+  &__text {
+    position: relative;
+    z-index: 2;
+    font-size: 19px;
+    line-height: 20px;
+    font-weight: 500;
+  }
+}
+
+.Button.danger {
+  background-color: red;
+
+  &:hover {
+    opacity: .7;
+  }
+}
+
+.Button.default {
+  background: linear-gradient(99.35deg, #29DDDF 4.04%, #04D4D7 4.05%, #3282C7 100%);
+  color: #fff;
+}

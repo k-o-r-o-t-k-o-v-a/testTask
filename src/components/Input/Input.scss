@@ -1,0 +1,48 @@
+.Input {
+  width: 100%;
+  &__el {
+    display: block;
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 15px;
+    border: 1px solid #3282C7;
+    transition: all .2s ease;
+    font-size: 19px;
+    line-height: 20px;
+    outline: none;
+
+
+    &:focus {
+      box-shadow: 0 0 0 5px rgba(#4169E1, .3);
+    }
+  }
+
+  &__error {
+    margin-top: 5px;
+    color: red;
+    font-size: 12px;
+    line-height: 15px;
+  }
+}
+
+.Input.disabled {
+  pointer-events: none;
+  touch-action: none;
+  .Input__el {
+    pointer-events: none;
+    touch-action: none;
+    opacity: .5;
+
+  }
+}
+
+.Input.error {
+
+  .Input__el {
+    border-color: red;
+
+    &:focus {
+      box-shadow: 0 0 0 5px rgba(red, .3);
+    }
+  }
+}
