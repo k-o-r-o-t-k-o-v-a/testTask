@@ -1,41 +1,82 @@
 import endpoints from './endpoints';
-
-class apiServise {
-  getBigData = async() => {
+class ApiService {
+  getBigData = async message => {
     try {
       const res = await fetch(endpoints.bigdata, {
         method: 'GET'
       });
 
-      return await res.json();
+      if (!res.ok) {
+        throw new Error(`HTTP status code: ${res.status}`);
+      }
+
+      return { data: await res.json(), status: `${res.status}` };
     } catch (e) {
-      console.log(e);
+      message = `Error occurred:
+       err.name: ${e.name}
+       err.message: ${e.message}`;
+      alert(message);
     }
   };
 
-  getSmallData = async() => {
+  getSmallData = async message => {
     try {
       const res = await fetch(endpoints.smalldata, {
         method: 'GET'
       });
 
-      return await res.json();
+      if (!res.ok) {
+        throw new Error(`HTTP status code: ${res.status}`);
+      }
+
+      return { data: await res.json(), status: `${res.status}` };
     } catch (e) {
-      console.log(e);
+      message = `Error occurred;
+       err.name: ${e.name}
+       err.message: ${e.message}`;
+      alert(message);
     }
   };
 
-  getError = async() => {
+  getError = async message => {
     try {
       const res = await fetch(endpoints.error, {
         method: 'GET'
       });
 
-      return await res.json();
+      if (!res.ok) {
+        throw new Error(`HTTP status code: ${res.status}`);
+      }
+
+      return { data: await res.json(), status: `${res.status}` };
     } catch (e) {
-      console.log(e);
+      message = `Error occurred;
+       err.name: ${e.name}
+       err.message: ${e.message}`;
+      alert(message);
+    }
+  };
+
+  getUserById = async(id, message) => {
+    const url = `${endpoints.bigdata}/${id}`;
+
+    try {
+      const res = await fetch(url, {
+        method: 'GET'
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP status code: ${res.status}`);
+      }
+
+      return { data: await res.json(), status: `${res.status}` };
+    } catch (e) {
+      message = `Error occurred;
+       err.name: ${e.name}
+       err.message: ${e.message}`;
+      alert(message);
     }
   };
 }
 
-export default apiServise;
+export default ApiService;

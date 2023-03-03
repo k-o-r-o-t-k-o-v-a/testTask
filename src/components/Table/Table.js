@@ -1,9 +1,11 @@
 import './Table.scss';
 import React from 'react';
+
 function Table({
   list,
   head,
-  clickOnRow
+  clickOnRow,
+  clickOnHeadItem
 }) {
   return (
     <div className="Table">
@@ -12,7 +14,11 @@ function Table({
           <tr className="Table__el_row">
             {
               head.map((item, index) => (
-                <th className="Table__el_head" key={index}>
+                <th
+                  onClick={() => { clickOnHeadItem(`${item}`); }}
+                  className="Table__el_head"
+                  key={index}
+                >
                   {item}
                 </th>
               ))
@@ -20,7 +26,6 @@ function Table({
           </tr>
         </thead>
         <tbody>
-          {' '}
           {
             list.map((item, index) => (
               <tr className="Table__el_row" key={index} onClick={() => clickOnRow(item)}>

@@ -25,7 +25,6 @@ Thumbs.db
 #frontend build
 node_modules/
 npm-debug.log
-public
 /*.png
 /*.svg
 .vscode
@@ -33,3 +32,13 @@ config.json
 
 #idea
 .idea
+
+#create-react-app
+./src/App.test.js
+./src/logo.svg
+./src/reportWebVitals.js
+./public/logo192.png
+./public/logo512.png
+./public/manifest.json
+./public/robots.txt
+

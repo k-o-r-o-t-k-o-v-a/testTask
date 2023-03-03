@@ -53,3 +53,12 @@ input.checked::before {
   box-shadow: 0 0 20px #3282C7;
 }
 
+label {
+  display: block;
+}
+
+span {
+  position: relative;
+  bottom: 6px;
+}
+

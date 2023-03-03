@@ -1,15 +1,15 @@
 import './Checkbox.scss';
-import React, { useState } from 'react';
+import React from 'react';
 
 function Checkbox({
   disabled,
   id,
   onClick,
   label,
-  style
+  style,
+  isChecked,
+  onChange
 }) {
-  const [isChecked, setIsChecked] = useState(false);
-
   return (
     <div className="checkbox-wrapper">
       <label>
@@ -21,7 +21,7 @@ function Checkbox({
           id={id}
           onClick={onClick}
           style={style}
-          onChange={() => setIsChecked(prev => !prev)}
+          onChange={onChange}
         />
         <span>{label}</span>
       </label>

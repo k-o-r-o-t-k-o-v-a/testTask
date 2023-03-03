@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import {
-  Col, Row, Button, Container
-} from 'react-bootstrap';
+import { Col, Row, Container } from 'react-bootstrap';
+import Button from '../components/Button/Button';
+import UserCard from '../components/UserCard/UserCard';
 import apiServise from '../service/api';
 
 const service = new apiServise();
@@ -10,62 +10,51 @@ const service = new apiServise();
 function UserPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [list, setList] = useState([]);
   const [userInfo, setUserInfo] = useState([]);
 
+  const getUser = async message => {
+    await service.getUserById(id)
+      .then(res => {
+        if (res.status === '200') {
+          setUserInfo(res.data);
+        } else {
+          navigate('/notfound');
+          console.log('Response error occurred; status code :', res.status);
+        }
+      })
+      .catch(err => {
+        navigate('/notfound');
+        console.log('Error occurred;', 'error name:', err.name, 'error msg:', err.message);
+      });
+  };
+
   useEffect(() => {
-    service.getBigData().then(res => setList(res));
+    getUser();
   }, []);
-
-  useEffect(() => {
-    if (id && list?.length > 0) {
-      // eslint-disable-next-line eqeqeq
-      const user = list.find(i => i.id == id);
-
-      user ? setUserInfo(user) : navigate('/notfound');
-    }
-  }, [id, list]);
 
   return (
     <Container>
-      <Row>
+      <Row style={{ alignItems: 'center' }}>
         <Col xs={12}>
-          <Row>
-            <Col xs={12}>
-              <b>First name:</b>
-              {' '}
-              {`${userInfo?.firstName}`}
-            </Col>
-            <Col xs={12}>
-              <b>Last name:</b>
-              {' '}
-              {`${userInfo?.lastName}`}
-            </Col>
-            <Col xs={12}>
-              <b>Email:</b>
-              {' '}
-              {`${userInfo?.email}`}
-            </Col>
-            <Col xs={12}>
-              <b>Phone:</b>
-              {' '}
-              {`${userInfo?.phone}`}
-            </Col>
-            <Col xs={12}>
-              <b>Address:</b>
-              {' '}
-              {`${userInfo?.address?.streetAddress}, ${userInfo?.address?.city}, ${userInfo?.address?.state}, ${userInfo.address?.zip}`}
-            </Col>
-            <Col xs={12}>
-              <b>Description:</b>
-              {' '}
-              {`${userInfo?.description}`}
-            </Col>
-          </Row>
+          <UserCard
+            firstName={`${userInfo?.firstName}`}
+            lastName={`${userInfo?.lastName}`}
+            email={`${userInfo?.email}`}
+            phone={`${userInfo?.phone}`}
+            address={`
+            ${userInfo?.address?.streetAddress}, 
+            ${userInfo?.address?.city}, 
+            ${userInfo?.address?.state}, ${userInfo.address?.zip}
+            `}
+            description={`${userInfo?.description}`}
+          />
 
         </Col>
         <Col xs={12}>
-          <Button variant="primary" onClick={() => navigate(-1)}>
+          <Button
+            variant="default"
+            onClick={() => navigate(-1)}
+          >
             Назад
           </Button>
         </Col>

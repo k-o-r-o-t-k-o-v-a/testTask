@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import { MoonLoader } from 'react-spinners';
+import { useNavigate } from 'react-router-dom';
 import TableError from '../components/TableError/TableError';
-import apiServise from '../service/api';
+import ApiService from '../service/api';
 import Container from '../components/Container/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Input from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import Checkbox from '../components/Checkbox/Checkbox';
 import Table from '../components/Table/Table';
+import useDebouncedFunction from '../components/helpers/useDebouncedFunction';
 
-const service = new apiServise();
+const service = new ApiService();
 
 const randomEp = [
   { f: service.getError },
@@ -20,33 +21,53 @@ const randomEp = [
   { f: service.getBigData }
 ];
 
-const tableHead = ['id', 'firstName', 'lastName', 'phone', 'email', 'descr', 'address'];
+const tableHead = ['id', 'firstName', 'lastName', 'phone', 'email', 'description', 'address'];
 
-function HomePage() {
-  const [loadPage, setLoadPage] = useState(false);
-  const [tableStatus, setTableStatus] = useState('empty');
-  const [btnTxt, setBtnTxt] = useState('Загрузить');
-  const [tableData, setTableData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [searchValue, setSearchValue] = useState('');
-  const [inputStatus, setInputStatus] = useState(false);
+function HomePage({
+  loadPage,
+  setLoadPage,
+  tableStatus,
+  setTableStatus,
+  btnTxt,
+  setBtnTxt,
+  tableData,
+  setTableData,
+  searchValue,
+  setSearchValue,
+  searchId,
+  setSearchId,
+  filteredData,
+  setFilteredData,
+  checkboxIsChecked,
+  setCheckboxIsChecked,
+  inputDisable,
+  setInputDisable
+
+}) {
+  const [errorText, setErrorText] = useState([]);
+  const [sortObj, setSortObj] = useState(false);
+  const [count, setCount] = useState(0);
   const navigate = useNavigate();
 
   const getData = () => {
     setSearchValue('');
+    setSearchId('');
     setLoadPage(true);
+    setCheckboxIsChecked(false);
     randomEp[Math.floor(Math.random() * randomEp.length)].f().then(res => {
-      // console.log(res)
-      if (res?.error) {
+      if (res?.data.error) {
         setTableStatus('error');
         setBtnTxt('Попробовать снова');
         setTableData([]);
         setFilteredData([]);
+        setErrorText(res.data.error.message);
       } else {
         setTableStatus('success');
         setBtnTxt('Обновить');
-        setTableData(res);
-        setFilteredData(res);
+        setTableData(res.data);
+        setFilteredData(res.data);
+        setInputDisable(false);
+        setCount(count + 1);
       }
     }).finally(_ => {
       setLoadPage(false);
@@ -57,15 +78,18 @@ function HomePage() {
     navigate(`/bigdata/${user?.id}`);
   };
 
-  useEffect(() => {
-    if (searchValue) {
-      const arr = tableData.filter(i => i.lastName.toUpperCase().includes(searchValue.toUpperCase()));
-
-      setFilteredData(arr);
-    } else {
-      setFilteredData(tableData);
+  const sortTableData = (field, obj) => {
+    if (obj && field === obj?.field) {
+      if (obj.type === 'up') {
+        return { field, type: 'down' };
+      }
     }
-  }, [searchValue, tableData]);
+    return { field, type: 'up' };
+  };
+
+  const requestSort = item => {
+    setSortObj(sortTableData(item, sortObj));
+  };
 
   const switchContent = useCallback(() => {
     switch (tableStatus) {
@@ -77,15 +101,19 @@ function HomePage() {
         );
       case 'error':
         return (
-          <TableError />
+          <TableError
+            errorParam={errorText}
+          />
         );
       case 'success':
         return (
           <Col xs={24}>
             <Table
-              list={filteredData}
               head={tableHead}
               clickOnRow={toUserPage}
+              clickOnHeadItem={requestSort}
+              list={filteredData}
+              className={`Table__el_head ${sortObj?.field ? `head-el-active head-el-active-${sortObj?.type}` : ''}`}
             />
           </Col>
         );
@@ -94,29 +122,96 @@ function HomePage() {
     }
   }, [tableStatus, filteredData]);
 
+  const handleChangeSearchValueId = value => {
+    if (value !== '' && +value > 0) {
+      setSearchId(value);
+    } else {
+      setSearchId('');
+    }
+  };
+
+  const debouncedSearchValue = useDebouncedFunction(
+    (searchValueParam, searchIdParam) => {
+      let arr = tableData;
+
+      if (searchValueParam) {
+        arr = arr.filter(i => i.lastName.toUpperCase().includes(searchValue.toUpperCase()));
+      }
+      if (searchId) {
+        arr = arr.filter(i => `${i.id}`.includes(searchIdParam));
+      }
+      setFilteredData(arr);
+    },
+    300
+  );
+
+  const sortingByDirection = async() => {
+    let arr = tableData;
+
+    if (sortObj) {
+      const { field, type } = sortObj;
+
+      if (type === 'up') {
+        arr = [...arr.sort((a, b) => (a[field] > b[field] ? 1 : -1))];
+      } else {
+        arr = [...arr.sort((a, b) => (a[field] < b[field] ? 1 : -1))];
+      }
+    }
+
+    setFilteredData(arr);
+  };
+
   useEffect(() => {
-    tableData?.length === 0 ? setInputStatus(true) : setInputStatus(false);
+    if (count !== 0) {
+      tableData?.length === 0 ? setInputDisable(true) : setInputDisable(false);
+    }
   }, [tableData]);
 
+  useEffect(() => {
+    if (searchValue || searchId) {
+      debouncedSearchValue(searchValue, searchId);
+    }
+  }, [searchValue, searchId, tableData]);
+
+  useEffect(() => {
+    sortingByDirection();
+  }, [sortObj]);
+
   return (
-    <div style={{ padding: '40px 0' }}>
+    <div style={{
+      padding: '40px 0',
+      overflow: 'hidden',
+      height: '100vh'
+    }}
+    >
       <Container>
         <Row>
           <Col style={{ padding: 10 }} xs={24}>
             <Row style={{ alignItems: 'center' }}>
               <Col>
                 <Input
-                  disabled={inputStatus}
+                  disabled={inputDisable}
                   onChange={e => setSearchValue(e.target.value)}
                   placeholder="Введите фамилию для поиска"
                   value={searchValue}
                 />
               </Col>
               <Col>
+                <Input
+                  disabled={inputDisable}
+                  onChange={e => handleChangeSearchValueId(e.target.value)}
+                  placeholder="Введите id для поиска"
+                  type="number"
+                  value={searchId}
+                />
+              </Col>
+              <Col>
                 <Checkbox
                   disabled={tableData?.length === 0}
                   label="Disable input?"
-                  onChange={e => setInputStatus(s => !s)}
+                  onClick={e => setInputDisable(s => !s)}
+                  onChange={() => setCheckboxIsChecked(prev => !prev)}
+                  isChecked={checkboxIsChecked}
                 />
               </Col>
             </Row>
