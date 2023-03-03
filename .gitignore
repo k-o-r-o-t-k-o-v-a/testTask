@@ -34,11 +34,11 @@ config.json
 .idea
 
 #create-react-app
-./src/App.test.js
-./src/logo.svg
-./src/reportWebVitals.js
-./public/logo192.png
-./public/logo512.png
-./public/manifest.json
-./public/robots.txt
+src/App.test.js
+src/logo.svg
+src/reportWebVitals.js
+public/logo192.png
+public/logo512.png
+public/manifest.json
+public/robots.txt
 
