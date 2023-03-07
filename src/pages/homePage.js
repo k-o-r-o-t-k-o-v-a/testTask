@@ -3,6 +3,7 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import { MoonLoader } from 'react-spinners';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import TableError from '../components/TableError/TableError';
 import ApiService from '../service/api';
 import Container from '../components/Container/Container';
@@ -12,6 +13,19 @@ import Button from '../components/Button/Button';
 import Checkbox from '../components/Checkbox/Checkbox';
 import Table from '../components/Table/Table';
 import useDebouncedFunction from '../components/helpers/useDebouncedFunction';
+import {
+  setLoadPage,
+  setTableStatus,
+  setBtnTxt,
+  setTableData,
+  setSearchValue,
+  setSearchId,
+  setFilteredData,
+  setCheckboxIsChecked,
+  setInputDisable,
+  toggleCheckboxIsChecked,
+  toggleInputDisable
+} from '../redux/actions/actions-creators';
 
 const service = new ApiService();
 
@@ -23,54 +37,46 @@ const randomEp = [
 
 const tableHead = ['id', 'firstName', 'lastName', 'phone', 'email', 'description', 'address'];
 
-function HomePage({
-  loadPage,
-  setLoadPage,
-  tableStatus,
-  setTableStatus,
-  btnTxt,
-  setBtnTxt,
-  tableData,
-  setTableData,
-  searchValue,
-  setSearchValue,
-  searchId,
-  setSearchId,
-  filteredData,
-  setFilteredData,
-  checkboxIsChecked,
-  setCheckboxIsChecked,
-  inputDisable,
-  setInputDisable
-
-}) {
+function HomePage() {
+  const {
+    loadPage,
+    tableStatus,
+    btnTxt,
+    tableData,
+    searchValue,
+    searchId,
+    filteredData,
+    checkboxIsChecked,
+    inputDisable
+  } = useSelector(store => store.rootReducer);
+  const dispatch = useDispatch();
   const [errorText, setErrorText] = useState([]);
   const [sortObj, setSortObj] = useState(false);
   const [count, setCount] = useState(0);
   const navigate = useNavigate();
 
   const getData = () => {
-    setSearchValue('');
-    setSearchId('');
-    setLoadPage(true);
-    setCheckboxIsChecked(false);
+    dispatch(setSearchValue(''));
+    dispatch(setSearchId(''));
+    dispatch(setLoadPage(true));
+    dispatch(setCheckboxIsChecked(false));
     randomEp[Math.floor(Math.random() * randomEp.length)].f().then(res => {
       if (res?.data.error) {
-        setTableStatus('error');
-        setBtnTxt('Попробовать снова');
-        setTableData([]);
-        setFilteredData([]);
+        dispatch(setTableStatus('error'));
+        dispatch(setBtnTxt('Попробовать снова'));
+        dispatch(setTableData([]));
+        dispatch(setFilteredData([]));
         setErrorText(res.data.error.message);
       } else {
-        setTableStatus('success');
-        setBtnTxt('Обновить');
-        setTableData(res.data);
-        setFilteredData(res.data);
-        setInputDisable(false);
+        dispatch(setTableStatus('success'));
+        dispatch(setBtnTxt('Обновить'));
+        dispatch(setTableData(res.data));
+        dispatch(setFilteredData(res.data));
+        dispatch(setInputDisable(false));
         setCount(count + 1);
       }
     }).finally(_ => {
-      setLoadPage(false);
+      dispatch(setLoadPage(false));
     });
   };
 
@@ -120,13 +126,13 @@ function HomePage({
       default:
         return null;
     }
-  }, [tableStatus, filteredData]);
+  }, [tableStatus, filteredData, errorText]);
 
   const handleChangeSearchValueId = value => {
     if (value !== '' && +value > 0) {
-      setSearchId(value);
+      dispatch(setSearchId(value));
     } else {
-      setSearchId('');
+      dispatch(setSearchId(''));
     }
   };
 
@@ -140,7 +146,7 @@ function HomePage({
       if (searchId) {
         arr = arr.filter(i => `${i.id}`.includes(searchIdParam));
       }
-      setFilteredData(arr);
+      dispatch(setFilteredData(arr));
     },
     300
   );
@@ -158,12 +164,12 @@ function HomePage({
       }
     }
 
-    setFilteredData(arr);
+    dispatch(setFilteredData(arr));
   };
 
   useEffect(() => {
     if (count !== 0) {
-      tableData?.length === 0 ? setInputDisable(true) : setInputDisable(false);
+      tableData?.length === 0 ? dispatch(setInputDisable(true)) : dispatch(setInputDisable(false));
     }
   }, [tableData]);
 
@@ -191,7 +197,7 @@ function HomePage({
               <Col>
                 <Input
                   disabled={inputDisable}
-                  onChange={e => setSearchValue(e.target.value)}
+                  onChange={e => dispatch(setSearchValue(e.target.value))}
                   placeholder="Введите фамилию для поиска"
                   value={searchValue}
                 />
@@ -209,8 +215,8 @@ function HomePage({
                 <Checkbox
                   disabled={tableData?.length === 0}
                   label="Disable input?"
-                  onClick={e => setInputDisable(s => !s)}
-                  onChange={() => setCheckboxIsChecked(prev => !prev)}
+                  onClick={e => dispatch(toggleInputDisable())}
+                  onChange={() => dispatch(toggleCheckboxIsChecked())}
                   isChecked={checkboxIsChecked}
                 />
               </Col>
